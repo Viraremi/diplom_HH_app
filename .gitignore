@@ -1,4 +1,5 @@
 # IntelliJ
+.idea
 *.iml
 /.idea/caches
 /.idea/libraries
@@ -47,3 +48,6 @@ google-services.json
 # OS specific
 .DS_Store
 *.log
+/gradle/wrapper/
+/.idea/
+.kotlin
