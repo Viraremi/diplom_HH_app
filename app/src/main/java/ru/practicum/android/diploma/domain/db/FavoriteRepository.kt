@@ -1,11 +1,11 @@
 package ru.practicum.android.diploma.domain.db
 
 import kotlinx.coroutines.flow.Flow
-import ru.practicum.android.diploma.domain.models.Vacancy
+import ru.practicum.android.diploma.domain.models.VacancyDetails
 
 interface FavoriteRepository {
-    suspend fun addToFavorite(vacancy: Vacancy)
-    suspend fun delFromFavorite(vacancy: Vacancy)
-    fun getFavorites(): Flow<List<Vacancy>>
-    fun getFavoriteById(vacId: String): Flow<Vacancy>
+    suspend fun addToFavorite(vacancy: VacancyDetails)
+    suspend fun delFromFavorite(vacancy: VacancyDetails)
+    fun getFavorites(): Flow<List<VacancyDetails>>
+    fun getFavoriteById(vacId: String): Flow<VacancyDetails?>
 }
