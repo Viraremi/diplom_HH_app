@@ -9,10 +9,10 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
@@ -22,7 +22,6 @@ import ru.practicum.android.diploma.databinding.FragmentMainBinding
 import ru.practicum.android.diploma.domain.vacancy.models.Vacancy
 import ru.practicum.android.diploma.ui.main.adapters.SearchResultsAdapter
 import ru.practicum.android.diploma.ui.main.models.SearchContentStateVO
-import ru.practicum.android.diploma.ui.main.utils.VacancyCallback
 import ru.practicum.android.diploma.ui.root.BindingFragment
 import ru.practicum.android.diploma.ui.root.RootActivity
 import ru.practicum.android.diploma.ui.vacancy.VacancyFragment
@@ -42,7 +41,7 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
         super.onViewCreated(view, savedInstanceState)
 
         initUiToolbar()
-        // системная кн назад
+
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             backPressedCallback
@@ -75,8 +74,33 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
             )
         }
 
+        viewModel.observeFiltersState().observe(viewLifecycleOwner) { hasFilters ->
+            val iconRes = if (hasFilters) {
+                R.drawable.filter_on__24px
+            } else {
+                R.drawable.filter_off__24px
+            }
+            binding.topbar.btnThird.setImageResource(iconRes)
+        }
+
         viewModel.observeClearSearchInput().observe(viewLifecycleOwner) {
             binding.searchEditText.setText("")
+        }
+
+        viewModel.observeShowErrorToast().observe(viewLifecycleOwner) { message ->
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.toast_api_error),
+                Toast.LENGTH_LONG,
+            ).show()
+        }
+
+        viewModel.observeShowNoInternetToast().observe(viewLifecycleOwner) { message ->
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.toast_no_internet),
+                Toast.LENGTH_LONG,
+            ).show()
         }
 
         initSearch()
@@ -101,19 +125,17 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
     }
 
     private fun initUiToolbar() {
-        // настройка кастомного топбара
-        val toolbar = binding.toolbar
-        toolbar.setupToolbarForSearchScreen()
-        toolbar.setToolbarTitle(getString(R.string.vacancy_search))
-        toolbar.setOnToolbarFilterClickListener {
+        binding.topbar.apply {
+            btnFirst.isVisible = false
+            btnSecond.isVisible = false
+            btnThird.setImageResource(R.drawable.filter_off__24px)
+            header.text = requireContext().getString(R.string.vacancy_search)
+        }
+
+        binding.topbar.btnThird.setOnClickListener {
             (activity as RootActivity).setNavBarVisibility(false)
             findNavController().navigate(R.id.action_mainFragment_to_filterFragment)
         }
-        /*
-        * !!! после того, как настроены все фильтры
-        * применить toolbar.setFilterState(true) для изменения иконки кнопки
-        */
-
     }
 
     //  callback для системной кн назад - выход из приложения
@@ -184,12 +206,17 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
         binding.searchBaseState.isVisible = false
         binding.noInternetError.isVisible = false
         binding.unknownError.isVisible = false
-        binding.searchResults.isVisible = true
+        binding.searchResults.isVisible = !firstSearch
         binding.progress.isVisible = firstSearch
         binding.progressPages.isVisible = !firstSearch
     }
 
     private fun showSearchResults(newVacancies: List<Vacancy>, found: Int) {
+        vacanciesAdapter?.submitList(newVacancies) {
+            // Будет вызван после завершения диффа и обновления UI
+            binding.searchResults.isVisible = found > 0
+        }
+
         binding.searchBaseState.isVisible = false
         binding.progress.isVisible = false
         binding.progressPages.isVisible = false
@@ -197,20 +224,11 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
         binding.unknownError.isVisible = false
         binding.vacanciesCount.isVisible = true
 
-        vacanciesAdapter?.let {
-            val diffVacanciesCallback = VacancyCallback(it.vacancies, newVacancies)
-            val diffVacancies = DiffUtil.calculateDiff(diffVacanciesCallback)
-            it.vacancies.clear()
-            it.vacancies.addAll(newVacancies)
-            diffVacancies.dispatchUpdatesTo(it)
-        }
-
         binding.vacanciesCount.text = resources.getQuantityString(
             R.plurals.vacancies_found,
             found,
             found,
         )
-        binding.searchResults.isVisible = found > 0
     }
 
     private fun showErrorState(isNoInternetError: Boolean) {
@@ -221,5 +239,11 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
         binding.unknownError.isVisible = !isNoInternetError
         binding.searchResults.isVisible = false
         binding.vacanciesCount.isVisible = false
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        viewModel.onResume()
     }
 }

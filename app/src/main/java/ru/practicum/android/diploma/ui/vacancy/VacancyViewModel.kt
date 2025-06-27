@@ -16,7 +16,7 @@ class VacancyViewModel(
     private val mapper: VacancyDetailsMapper,
     private val favoriteInteractor: FavoriteInteractor
 ) : ViewModel() {
-    private var vacancy: VacancyDetails? = null
+    private var vacancyLocal: VacancyDetails? = null
 
     private val _vacancyState = MutableStateFlow<VacancyContentStateVO>(VacancyContentStateVO.Base)
     val vacancyState: StateFlow<VacancyContentStateVO> = _vacancyState.asStateFlow()
@@ -25,36 +25,59 @@ class VacancyViewModel(
         _vacancyState.value = VacancyContentStateVO.Loading
 
         viewModelScope.launch {
-            when (val result = repository.getVacancyDetails(id)) {
-                is ApiResponse.Success -> {
-                    vacancy = result.data
-                    val vo = result.data?.let {
-                        mapper.run { it.toVO() }
-                    }
-                    if (vo != null) {
-                        _vacancyState.value = VacancyContentStateVO.Success(vo)
-                    } else {
-                        _vacancyState.value = VacancyContentStateVO.Error
-                    }
-                }
-
-                is ApiResponse.Error -> {
-                    _vacancyState.value = VacancyContentStateVO.Error
-                }
+            var vacancyDetails: VacancyDetails? = null
+            favoriteInteractor.getFavoriteById(id).collect { vacancy ->
+                vacancyDetails = vacancy
+            }
+            vacancyDetails = vacancyLocal ?: vacancyDetails
+            if (vacancyDetails != null) {
+                loadingFromFavorite(id)
+            } else {
+                loadingFromInternet(id)
             }
         }
     }
 
     fun changeFavorite() {
-        vacancy?.let {
+        vacancyLocal?.let { vacancy ->
             viewModelScope.launch {
-                if (it.isFavorite) {
-                    favoriteInteractor.delFromFavorite(it)
+                val isFavorite = vacancy.isFavorite
+                if (isFavorite) {
+                    favoriteInteractor.delFromFavorite(vacancy)
                 } else {
-                    favoriteInteractor.addToFavorite(it)
+                    favoriteInteractor.addToFavorite(vacancy)
                 }
-                _vacancyState.value = VacancyContentStateVO.Refresh
+                vacancyLocal = vacancy.copy(isFavorite = !isFavorite)
+                _vacancyState.value = VacancyContentStateVO.SetFavorite(!vacancy.isFavorite)
             }
+        }
+    }
+
+    private suspend fun loadingFromFavorite(id: String) {
+        favoriteInteractor.getFavoriteById(id).collect { vacancy ->
+            processResult(vacancy)
+        }
+    }
+
+    private suspend fun loadingFromInternet(id: String) {
+        when (val result = repository.getVacancyDetails(id)) {
+            is ApiResponse.Success -> {
+                processResult(result.data)
+            }
+
+            is ApiResponse.Error -> {
+                _vacancyState.value = VacancyContentStateVO.Error
+            }
+        }
+    }
+
+    private fun processResult(vacancy: VacancyDetails?) {
+        vacancyLocal = vacancy
+        if (vacancy != null) {
+            val vo = mapper.run { vacancy.toVO() }
+            _vacancyState.value = VacancyContentStateVO.Success(vo)
+        } else {
+            _vacancyState.value = VacancyContentStateVO.Error
         }
     }
 }

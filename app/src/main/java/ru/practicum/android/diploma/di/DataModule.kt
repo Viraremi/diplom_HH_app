@@ -10,6 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import ru.practicum.android.diploma.data.db.AppDatabase
 import ru.practicum.android.diploma.data.db.converters.VacanciesDbConverter
 import ru.practicum.android.diploma.data.db.dao.VacanciesDao
+import ru.practicum.android.diploma.data.filters.FilterPreferencesImpl
 import ru.practicum.android.diploma.data.impl.TokenProviderImpl
 import ru.practicum.android.diploma.data.network.AuthInterceptor
 import ru.practicum.android.diploma.data.network.NetworkClient
@@ -18,9 +19,11 @@ import ru.practicum.android.diploma.data.network.TokenProvider
 import ru.practicum.android.diploma.data.vacancy.HhApi
 import ru.practicum.android.diploma.data.vacancy.SearchVacanciesNetworkDataSource
 import ru.practicum.android.diploma.data.vacancy.VacancyDetailsNetworkDataSource
+import ru.practicum.android.diploma.domain.api.FilterPreferences
 import ru.practicum.android.diploma.ui.vacancy.HtmlParser
 import ru.practicum.android.diploma.ui.vacancy.VacancyDetailsMapper
 import ru.practicum.android.diploma.util.API_BASE
+import ru.practicum.android.diploma.util.FILTER_PREFS_NAME
 
 val dataModule = module {
     single {
@@ -56,7 +59,7 @@ val dataModule = module {
     single {
         OkHttpClient.Builder()
             .addInterceptor(get<AuthInterceptor>())
-            .addInterceptor(get<HttpLoggingInterceptor>())
+            // .addInterceptor(get<HttpLoggingInterceptor>())
             .build()
     }
 
@@ -83,4 +86,12 @@ val dataModule = module {
     single { HtmlParser() }
 
     single { VacancyDetailsMapper(get()) }
+
+    single {
+        androidContext().getSharedPreferences(FILTER_PREFS_NAME, android.content.Context.MODE_PRIVATE)
+    }
+
+    single<FilterPreferences> {
+        FilterPreferencesImpl(get())
+    }
 }

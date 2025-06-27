@@ -51,7 +51,6 @@ class VacancyFragment : BindingFragment<FragmentVacancyBinding>() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             closeFragment(true)
         }
-
         viewModel.loadVacancyDetails(vacancyId)
     }
 
@@ -63,16 +62,20 @@ class VacancyFragment : BindingFragment<FragmentVacancyBinding>() {
     }
 
     private fun initUiToolbar() {
-        // настройка кастомного топбара
-        val toolbar = binding.toolbar
-        toolbar.setupToolbarForVacancyDetailScreen()
-        toolbar.setToolbarTitle(getString(R.string.vacancy))
-        toolbar.setupToolbarBackButtonCustom {
+        binding.topbar.apply {
+            btnFirst.setImageResource(R.drawable.arrow_back_24px)
+            btnSecond.setImageResource(R.drawable.sharing_24px)
+            btnThird.setImageResource(R.drawable.favorites_off__24px)
+            header.text = requireContext().getString(R.string.vacancy)
+        }
+
+        // Назад
+        binding.topbar.btnFirst.setOnClickListener {
             closeFragment(true)
         }
 
         // Поделиться
-        toolbar.setOnToolbarShareClickListener {
+        binding.topbar.btnSecond.setOnClickListener {
             requireContext().startActivity(
                 Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
@@ -83,7 +86,7 @@ class VacancyFragment : BindingFragment<FragmentVacancyBinding>() {
         }
 
         // Избранное
-        toolbar.setOnToolbarFavoriteClickListener {
+        binding.topbar.btnThird.setOnClickListener {
             viewModel.changeFavorite()
         }
     }
@@ -99,7 +102,7 @@ class VacancyFragment : BindingFragment<FragmentVacancyBinding>() {
             is VacancyContentStateVO.Loading -> showLoading()
             is VacancyContentStateVO.Error -> showError()
             is VacancyContentStateVO.Success -> showVacancyDetails(state.vacancy)
-            is VacancyContentStateVO.Refresh -> viewModel.loadVacancyDetails(vacancyId)
+            is VacancyContentStateVO.SetFavorite -> setFavoriteIcon(state.isFavorite)
         }
     }
 
@@ -109,7 +112,7 @@ class VacancyFragment : BindingFragment<FragmentVacancyBinding>() {
 
     private fun showLoading() {
         binding.contentView.isVisible = false
-        binding.includedProgressBar.porgressBar.isVisible = true
+        binding.includedProgressBar.progressBar.isVisible = true
         binding.includedErr.root.isVisible = false
     }
 
@@ -154,16 +157,20 @@ class VacancyFragment : BindingFragment<FragmentVacancyBinding>() {
     }
 
     private fun setFavoriteIcon(state: Boolean) {
-        if (state) {
-            binding.toolbar.setFavoriteIcon(R.drawable.favorites_on__24px)
-        } else {
-            binding.toolbar.setFavoriteIcon(R.drawable.favorites_off__24px)
-        }
+        binding.topbar.btnThird.setImageResource(
+            if (state) {
+                R.drawable.favorites_on__24px
+            } else {
+                R.drawable.favorites_off__24px
+            }
+        )
     }
 
     companion object {
         private const val ARGS_ID = "vacancy_id"
 
-        fun createArgs(vacancyId: String): Bundle = bundleOf(ARGS_ID to vacancyId)
+        fun createArgs(vacancyId: String): Bundle = bundleOf(
+            ARGS_ID to vacancyId
+        )
     }
 }
