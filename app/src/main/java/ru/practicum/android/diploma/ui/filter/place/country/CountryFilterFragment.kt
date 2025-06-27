@@ -95,7 +95,10 @@ class CountryFilterFragment : BindingFragment<FragmentCountryFilterBinding>() {
     }
 
     private fun onClickCountry(country: Country) {
-        findNavController().previousBackStackEntry?.savedStateHandle?.set(COUNTRY_KEY, country)
+        findNavController().previousBackStackEntry?.savedStateHandle?.set(
+            COUNTRY_KEY,
+            viewModel.serializeCountry(country)
+        )
         findNavController().previousBackStackEntry?.savedStateHandle?.set(REGION_KEY, null)
         findNavController().popBackStack()
     }

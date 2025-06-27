@@ -5,6 +5,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.gson.Gson
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentFilterBinding
 import ru.practicum.android.diploma.domain.api.FilterPreferences
@@ -14,7 +15,8 @@ import ru.practicum.android.diploma.ui.filter.place.models.Country
 import ru.practicum.android.diploma.ui.filter.place.models.Region
 
 class FilterViewModel(
-    private val filterPreferences: FilterPreferences
+    private val filterPreferences: FilterPreferences,
+    private val gson: Gson
 ) : ViewModel() {
 
     private val state = MutableLiveData<FilterScreenState>()
@@ -95,33 +97,21 @@ class FilterViewModel(
         state.postValue(FilterScreenState.CONTENT(selectedFilters))
     }
 
-    fun setCountry(country: Country?) {
-        selectedFilters = selectedFilters.copy(country = country)
+    fun setCountry(country: String?) {
+        val countryClass = gson.fromJson(country, Country::class.java)
+        selectedFilters = selectedFilters.copy(country = countryClass)
         state.postValue(FilterScreenState.CONTENT(selectedFilters))
     }
 
-    fun setRegion(region: Region?) {
-        selectedFilters = selectedFilters.copy(region = region)
+    fun setRegion(region: String?) {
+        val regionClass = gson.fromJson(region, Region::class.java)
+        selectedFilters = selectedFilters.copy(region = regionClass)
         state.postValue(FilterScreenState.CONTENT(selectedFilters))
     }
 
     fun setSalary(salary: Int?) {
         selectedFilters = selectedFilters.copy(salary = salary)
         state.postValue(FilterScreenState.CONTENT(selectedFilters))
-    }
-
-    companion object {
-        private const val DEFAUlT_INDUSTRY_ID = ""
-        private const val DEFAULT_INDUSTRY_NAME = ""
-
-        private val DEFAULT_FILTERS = SelectedFilters(
-            null,
-            null,
-            DEFAUlT_INDUSTRY_ID,
-            DEFAULT_INDUSTRY_NAME,
-            null,
-            false
-        )
     }
 
     fun screenInit(binding: FragmentFilterBinding, context: Context) {
@@ -145,5 +135,19 @@ class FilterViewModel(
         }
         binding.includedBtnSet.root.isVisible = false
         binding.includedBtnCancel.root.isVisible = false
+    }
+
+    companion object {
+        private const val DEFAUlT_INDUSTRY_ID = ""
+        private const val DEFAULT_INDUSTRY_NAME = ""
+
+        private val DEFAULT_FILTERS = SelectedFilters(
+            null,
+            null,
+            DEFAUlT_INDUSTRY_ID,
+            DEFAULT_INDUSTRY_NAME,
+            null,
+            false
+        )
     }
 }

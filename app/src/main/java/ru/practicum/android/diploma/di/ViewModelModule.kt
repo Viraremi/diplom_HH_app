@@ -1,5 +1,6 @@
 package ru.practicum.android.diploma.di
 
+import com.google.gson.Gson
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import ru.practicum.android.diploma.ui.favorite.viewmodel.FavoriteViewModel
@@ -27,7 +28,7 @@ val viewModelModule = module {
     }
 
     viewModel {
-        FilterViewModel(get())
+        FilterViewModel(get(), get())
     }
 
     viewModel {
@@ -35,14 +36,21 @@ val viewModelModule = module {
     }
 
     viewModel {
-        CountryViewModel(get())
+        CountryViewModel(get(), get())
     }
 
     viewModel { (country: Country?) ->
-        RegionViewModel(get(), country)
+        RegionViewModel(get(),
+            get<Gson>().toJson(country),
+            get()
+        )
     }
 
     viewModel { (country: Country?, region: Region?) ->
-        PlaceViewModel(country, region)
+        PlaceViewModel(
+            get<Gson>().toJson(country),
+            get<Gson>().toJson(region),
+            get()
+        )
     }
 }

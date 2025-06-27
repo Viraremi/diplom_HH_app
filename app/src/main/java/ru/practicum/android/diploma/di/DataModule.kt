@@ -1,6 +1,7 @@
 package ru.practicum.android.diploma.di
 
 import androidx.room.Room
+import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -20,6 +21,7 @@ import ru.practicum.android.diploma.data.vacancy.HhApi
 import ru.practicum.android.diploma.data.vacancy.SearchVacanciesNetworkDataSource
 import ru.practicum.android.diploma.data.vacancy.VacancyDetailsNetworkDataSource
 import ru.practicum.android.diploma.domain.api.FilterPreferences
+import ru.practicum.android.diploma.ui.filter.place.AreasConverter
 import ru.practicum.android.diploma.ui.vacancy.HtmlParser
 import ru.practicum.android.diploma.ui.vacancy.VacancyDetailsMapper
 import ru.practicum.android.diploma.util.API_BASE
@@ -29,6 +31,14 @@ val dataModule = module {
     single {
         Room.databaseBuilder(androidContext(), AppDatabase::class.java, "hh_database.db")
             .build()
+    }
+
+    single {
+        Gson()
+    }
+
+    single {
+        AreasConverter(get())
     }
 
     single<VacanciesDao> {
@@ -59,7 +69,6 @@ val dataModule = module {
     single {
         OkHttpClient.Builder()
             .addInterceptor(get<AuthInterceptor>())
-            // .addInterceptor(get<HttpLoggingInterceptor>())
             .build()
     }
 
@@ -92,6 +101,6 @@ val dataModule = module {
     }
 
     single<FilterPreferences> {
-        FilterPreferencesImpl(get())
+        FilterPreferencesImpl(get(), get())
     }
 }

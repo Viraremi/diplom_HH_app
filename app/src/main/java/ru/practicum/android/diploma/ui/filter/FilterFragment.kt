@@ -43,11 +43,11 @@ class FilterFragment : BindingFragment<FragmentFilterBinding>() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             closeFragment(true)
         }
-        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Country?>(COUNTRY_KEY)
+        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String?>(COUNTRY_KEY)
             ?.observe(viewLifecycleOwner) { country ->
                 viewModel.setCountry(country)
             }
-        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Region?>(REGION_KEY)
+        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String?>(REGION_KEY)
             ?.observe(viewLifecycleOwner) { region ->
                 viewModel.setRegion(region)
             }

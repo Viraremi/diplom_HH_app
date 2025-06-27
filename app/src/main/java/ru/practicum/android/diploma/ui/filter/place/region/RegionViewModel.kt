@@ -4,16 +4,21 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import kotlinx.coroutines.launch
+import ru.practicum.android.diploma.data.network.NoInternetException
 import ru.practicum.android.diploma.domain.filters.AreasInteractor
 import ru.practicum.android.diploma.domain.models.Areas
 import ru.practicum.android.diploma.ui.filter.place.models.Country
 import ru.practicum.android.diploma.ui.filter.place.models.Region
 import ru.practicum.android.diploma.ui.filter.place.models.RegionState
+import ru.practicum.android.diploma.util.HTTP_500_INTERNAL_SERVER_ERROR
+import ru.practicum.android.diploma.util.HTTP_NO_CONNECTION
 
 class RegionViewModel(
     private val areasInteractor: AreasInteractor,
-    country: Country?
+    country: String?,
+    private val gson: Gson
 ) : ViewModel() {
     private val regionsFilterState = MutableLiveData<RegionState>()
     fun observeState(): LiveData<RegionState> = regionsFilterState
@@ -23,7 +28,7 @@ class RegionViewModel(
 
     init {
         render(RegionState.Loading)
-        parentCountry = country
+        parentCountry = gson.fromJson(country, Country::class.java)
         viewModelScope.launch {
             areasInteractor.getAreas().collect { pair ->
                 processAreas(pair.first, pair.second)
@@ -31,7 +36,7 @@ class RegionViewModel(
         }
     }
 
-    private fun processAreas(areas: List<Areas>?, error: Int?) {
+    private fun processAreas(areas: List<Areas>?, error: Throwable?) {
         if (areas != null) {
             regionList.clear()
             fillRegionsList(areas)
@@ -43,7 +48,11 @@ class RegionViewModel(
             }
         }
         if (error != null) {
-            render(RegionState.Error(error))
+            if (error is NoInternetException) {
+                render(RegionState.Error(HTTP_NO_CONNECTION))
+            } else {
+                render(RegionState.Error(HTTP_500_INTERNAL_SERVER_ERROR))
+            }
         }
     }
 
@@ -93,6 +102,14 @@ class RegionViewModel(
 
     private fun render(state: RegionState) {
         regionsFilterState.postValue(state)
+    }
+
+    fun serializeCountry(country: Country): String {
+        return gson.toJson(country)
+    }
+
+    fun serializeRegion(region: Region): String {
+        return gson.toJson(region)
     }
 
 }

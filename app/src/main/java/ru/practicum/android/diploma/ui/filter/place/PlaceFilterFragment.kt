@@ -20,13 +20,12 @@ import ru.practicum.android.diploma.ui.root.BindingFragment
 import ru.practicum.android.diploma.ui.root.RootActivity
 import ru.practicum.android.diploma.util.COUNTRY_KEY
 import ru.practicum.android.diploma.util.REGION_KEY
-import ru.practicum.android.diploma.util.getSerializable
 
 class PlaceFilterFragment : BindingFragment<FragmentPlaceFilterBinding>() {
     private val placeViewModel: PlaceViewModel by viewModel {
         parametersOf(
-            getSerializable(requireArguments(), ARG_COUNTRY, Country::class.java),
-            getSerializable(requireArguments(), ARG_REGION, Region::class.java),
+            requireArguments().getString(ARG_COUNTRY),
+            requireArguments().getString(ARG_REGION)
         )
     }
 
@@ -50,11 +49,11 @@ class PlaceFilterFragment : BindingFragment<FragmentPlaceFilterBinding>() {
             }
         }
 
-        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Country>(COUNTRY_KEY)
+        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>(COUNTRY_KEY)
             ?.observe(viewLifecycleOwner) { data ->
                 placeViewModel.changeCountry(data)
             }
-        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Region>(REGION_KEY)
+        findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>(REGION_KEY)
             ?.observe(viewLifecycleOwner) { data ->
                 placeViewModel.changeRegion(data)
             }
@@ -181,5 +180,6 @@ class PlaceFilterFragment : BindingFragment<FragmentPlaceFilterBinding>() {
             ARG_COUNTRY to country,
             ARG_REGION to region
         )
+
     }
 }

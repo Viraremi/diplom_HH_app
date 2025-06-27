@@ -4,5 +4,5 @@ import kotlinx.coroutines.flow.Flow
 import ru.practicum.android.diploma.domain.models.Areas
 
 interface AreasInteractor {
-    fun getAreas(): Flow<Pair<List<Areas>?, Int?>>
+    fun getAreas(): Flow<Pair<List<Areas>?, Throwable?>>
 }

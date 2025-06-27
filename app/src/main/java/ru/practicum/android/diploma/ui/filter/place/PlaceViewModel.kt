@@ -3,13 +3,15 @@ package ru.practicum.android.diploma.ui.filter.place
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.gson.Gson
 import ru.practicum.android.diploma.ui.filter.place.models.Country
 import ru.practicum.android.diploma.ui.filter.place.models.PlaceState
 import ru.practicum.android.diploma.ui.filter.place.models.Region
 
 class PlaceViewModel(
-    private val country: Country?,
-    private val region: Region?
+    country: String?,
+    region: String?,
+    private val gson: Gson
 ) : ViewModel() {
     private var countryLocal: Country? = null
     private var regionLocal: Region? = null
@@ -18,20 +20,19 @@ class PlaceViewModel(
     fun observeState(): LiveData<PlaceState> = stateLiveData
 
     init {
-        countryLocal = country
-        regionLocal = region
-
-        stateLiveData.postValue(PlaceState.Content(country, region))
+        countryLocal = gson.fromJson(country, Country::class.java)
+        regionLocal = gson.fromJson(region, Region::class.java)
+        stateLiveData.postValue(PlaceState.Content(countryLocal, regionLocal))
     }
 
-    fun changeCountry(countryChange: Country?) {
-        countryLocal = countryChange
+    fun changeCountry(countryChange: String?) {
+        countryLocal = gson.fromJson(countryChange, Country::class.java)
         regionLocal = null
         stateLiveData.postValue(PlaceState.Content(countryLocal, regionLocal))
     }
 
-    fun changeRegion(regionChange: Region?) {
-        regionLocal = regionChange
+    fun changeRegion(regionChange: String?) {
+        regionLocal = gson.fromJson(regionChange, Region::class.java)
         stateLiveData.postValue(PlaceState.Content(countryLocal, regionLocal))
     }
 

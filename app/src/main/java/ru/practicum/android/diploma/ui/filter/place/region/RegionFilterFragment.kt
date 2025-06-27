@@ -28,12 +28,11 @@ import ru.practicum.android.diploma.ui.root.RootActivity
 import ru.practicum.android.diploma.util.COUNTRY_KEY
 import ru.practicum.android.diploma.util.REGION_KEY
 import ru.practicum.android.diploma.util.debounce
-import ru.practicum.android.diploma.util.getSerializable
 
 class RegionFilterFragment : BindingFragment<FragmentRegionFilterBinding>() {
     private val regionViewModel: RegionViewModel by viewModel {
         parametersOf(
-            getSerializable(requireArguments(), ARG_COUNTRY, Country::class.java),
+            requireArguments().getString(ARG_COUNTRY),
         )
     }
 
@@ -164,9 +163,15 @@ class RegionFilterFragment : BindingFragment<FragmentRegionFilterBinding>() {
 
     private fun onClickRegion(region: Region) {
         if (region.country != null) {
-            findNavController().previousBackStackEntry?.savedStateHandle?.set(COUNTRY_KEY, region.country)
+            findNavController().previousBackStackEntry?.savedStateHandle?.set(
+                COUNTRY_KEY,
+                regionViewModel.serializeCountry(region.country)
+            )
         }
-        findNavController().previousBackStackEntry?.savedStateHandle?.set(REGION_KEY, region)
+        findNavController().previousBackStackEntry?.savedStateHandle?.set(
+            REGION_KEY,
+            regionViewModel.serializeRegion(region)
+        )
         findNavController().popBackStack()
     }
 
@@ -192,7 +197,7 @@ class RegionFilterFragment : BindingFragment<FragmentRegionFilterBinding>() {
         private const val ARG_COUNTRY = "country"
         private const val CLICK_DEBOUNCE_DELAY = 500L
 
-        fun createArgs(country: Country?): Bundle = bundleOf(
+        fun createArgs(country: String?): Bundle = bundleOf(
             ARG_COUNTRY to country
         )
     }
