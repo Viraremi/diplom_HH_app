@@ -44,8 +44,7 @@ class IndustryViewModel(
             _industryState.postValue(
                 if (listItems.isEmpty()) {
                     IndustryState.EMPTY
-                }
-                else {
+                } else {
                     IndustryState.CONTENT(listItems)
                 }
             )
@@ -74,8 +73,7 @@ class IndustryViewModel(
         _industryState.postValue(
             if (filteredList.isEmpty()) {
                 IndustryState.EMPTY
-            }
-            else {
+            } else {
                 IndustryState.CONTENT(filteredList)
             }
         )
