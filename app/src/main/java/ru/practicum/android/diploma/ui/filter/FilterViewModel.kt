@@ -3,6 +3,7 @@ package ru.practicum.android.diploma.ui.filter
 import android.content.Context
 import androidx.core.view.isVisible
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import ru.practicum.android.diploma.R
@@ -20,12 +21,54 @@ class FilterViewModel(
     private val state = MutableLiveData<FilterScreenState>()
     fun getState(): LiveData<FilterScreenState> = state
 
+    private val initialState = MutableLiveData<FilterScreenState>()
+
+    fun getCurrentSalary(): Int? {
+        return selectedFilters.salary
+    }
+
+    private val isFiltersChanged = MediatorLiveData<Boolean>().apply {
+        val observer: () -> Unit = {
+            val current = state.value
+            val initial = initialState.value
+
+            value = current is FilterScreenState.CONTENT &&
+                initial is FilterScreenState.CONTENT &&
+                !compareFilters(current.value, initial.value)
+        }
+
+        addSource(state) { observer() }
+        addSource(initialState) { observer() }
+    }
+
+    private val isFiltersDefault = MediatorLiveData<Boolean>().apply {
+        val observer: () -> Unit = {
+            val current = state.value
+
+            value = current is FilterScreenState.CONTENT && compareFilters(current.value, DEFAULT_FILTERS)
+        }
+
+        addSource(state) { observer() }
+    }
+
+    fun getIsFiltersChanged(): LiveData<Boolean> = isFiltersChanged
+    fun getIsFiltersDefault(): LiveData<Boolean> = isFiltersDefault
+
     private var selectedFilters = DEFAULT_FILTERS
 
-    fun getFilters() {
+    private fun compareFilters(a: SelectedFilters, b: SelectedFilters): Boolean {
+        return a.region?.id == b.region?.id &&
+            a.country?.id == b.country?.id &&
+            a.industry == b.industry &&
+            a.salary == b.salary &&
+            a.onlyWithSalary == b.onlyWithSalary
+    }
+
+    fun onCreate() {
         // Тут мы достаем сохраненные в SP фильтры
         selectedFilters = filterPreferences.loadFilters() ?: DEFAULT_FILTERS
         state.postValue(FilterScreenState.CONTENT(selectedFilters))
+        initialState.postValue(FilterScreenState.CONTENT(selectedFilters))
     }
 
     fun clearPlace() {
