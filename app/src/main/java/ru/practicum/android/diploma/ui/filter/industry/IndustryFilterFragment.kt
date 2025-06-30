@@ -31,6 +31,7 @@ class IndustryFilterFragment : BindingFragment<FragmentIndustryFilterBinding>() 
         return FragmentIndustryFilterBinding.inflate(inflater, container, false)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -53,24 +54,26 @@ class IndustryFilterFragment : BindingFragment<FragmentIndustryFilterBinding>() 
             }
         )
 
-        editText.setOnTouchListener(object : View.OnTouchListener {
+        editText.setOnTouchListener(
             @SuppressLint("ClickableViewAccessibility")
-            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-                if (event?.action == MotionEvent.ACTION_UP) {
-                    val drawableEnd = editText.compoundDrawables[2]
-                    if (drawableEnd != null) {
-                        val touchX = event.x
-                        val drawableStart = editText.width - editText.paddingEnd - drawableEnd.bounds.width()
-                        if (touchX >= drawableStart) {
-                            editText.text.clear()
-                            v?.performClick()
-                            return true
+            object : View.OnTouchListener {
+                override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                    if (event?.action == MotionEvent.ACTION_UP) {
+                        val drawableEnd = editText.compoundDrawables[2]
+                        if (drawableEnd != null) {
+                            val touchX = event.x
+                            val drawableStart = editText.width - editText.paddingEnd - drawableEnd.bounds.width()
+                            if (touchX >= drawableStart) {
+                                editText.text.clear()
+                                v?.performClick()
+                                return true
+                            }
                         }
                     }
+                    return false
                 }
-                return false
             }
-        })
+        )
 
         args.selectedIndustryId?.let { viewModel.setPreselectedIndustryId(it) }
         viewModel.getIndustries()
