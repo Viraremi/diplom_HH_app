@@ -31,14 +31,15 @@ class IndustryFilterFragment : BindingFragment<FragmentIndustryFilterBinding>() 
         return FragmentIndustryFilterBinding.inflate(inflater, container, false)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.industrySearch.searchEditText.hint = getString(R.string.enter_industry)
         binding.buttonActionIndustry.buttonBlue.text = getString(R.string.select)
 
-        binding.industrySearch.searchEditText.addTextChangedListener(
+        val editText = binding.industrySearch.searchEditText
+
+        editText.addTextChangedListener(
             onTextChanged = { text, _, _, _ ->
                 val hasText = !text.isNullOrEmpty()
                 val icon = if (hasText) {
@@ -47,25 +48,29 @@ class IndustryFilterFragment : BindingFragment<FragmentIndustryFilterBinding>() 
                     ContextCompat.getDrawable(requireContext(), R.drawable.search_24px)
                 }
 
-                binding.industrySearch.searchEditText.setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null)
+                editText.setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null)
                 viewModel.filterIndustries(text.toString())
             }
         )
 
-        binding.industrySearch.searchEditText.setOnTouchListener { v, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
-                val drawableEnd = binding.industrySearch.searchEditText.compoundDrawables[2]
-                if (drawableEnd != null) {
-                    val touchX = event.x
-                    val drawableStart = binding.industrySearch.searchEditText.width - binding.industrySearch.searchEditText.paddingEnd - drawableEnd.bounds.width()
-                    if (touchX >= drawableStart) {
-                        binding.industrySearch.searchEditText.text.clear()
-                        return@setOnTouchListener true
+        editText.setOnTouchListener(object : View.OnTouchListener {
+            @SuppressLint("ClickableViewAccessibility")
+            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                if (event?.action == MotionEvent.ACTION_UP) {
+                    val drawableEnd = editText.compoundDrawables[2]
+                    if (drawableEnd != null) {
+                        val touchX = event.x
+                        val drawableStart = editText.width - editText.paddingEnd - drawableEnd.bounds.width()
+                        if (touchX >= drawableStart) {
+                            editText.text.clear()
+                            v?.performClick()
+                            return true
+                        }
                     }
                 }
+                return false
             }
-            false
-        }
+        })
 
         args.selectedIndustryId?.let { viewModel.setPreselectedIndustryId(it) }
         viewModel.getIndustries()
