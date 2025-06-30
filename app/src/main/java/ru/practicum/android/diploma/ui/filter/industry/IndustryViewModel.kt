@@ -42,8 +42,9 @@ class IndustryViewModel(
                 )
             }
             _industryState.postValue(
-                if(listItems.isEmpty()) IndustryState.EMPTY
-                else IndustryState.CONTENT(listItems))
+                if (listItems.isEmpty()) IndustryState.EMPTY
+                else IndustryState.CONTENT(listItems)
+            )
         } else if (error != null) {
             _industryState.postValue(IndustryState.ERROR(error))
         } else {
@@ -68,7 +69,8 @@ class IndustryViewModel(
         }
         _industryState.postValue(
             if (filteredList.isEmpty()) IndustryState.EMPTY
-            else IndustryState.CONTENT(filteredList))
+            else IndustryState.CONTENT(filteredList)
+        )
     }
 
     fun getSelectedIndustry(): IndustryListItem? {
