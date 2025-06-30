@@ -107,7 +107,6 @@ class FilterFragment : BindingFragment<FragmentFilterBinding>() {
         initListenersSalaryAndBtns()
     }
 
-    @Suppress("LongMethod")
     private fun initListeners() {
         binding.includedPlace.root.setOnClickListener {
             val state = viewModel.getState().value
