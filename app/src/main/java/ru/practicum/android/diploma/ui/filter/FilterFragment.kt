@@ -2,6 +2,7 @@ package ru.practicum.android.diploma.ui.filter
 
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
@@ -43,7 +44,9 @@ class FilterFragment : BindingFragment<FragmentFilterBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initUiToolbar()
+        binding.topbar.btnFirst.setOnClickListener {
+            closeFragment(true)
+        }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             closeFragment(true)
         }
@@ -78,7 +81,6 @@ class FilterFragment : BindingFragment<FragmentFilterBinding>() {
                 is FilterScreenState.CONTENT -> showContent(state.value)
             }
         }
-
         viewModel.getIsFiltersChanged().observe(viewLifecycleOwner) { isChanged ->
             binding.includedBtnSet.root.isVisible = isChanged
         }
@@ -86,12 +88,13 @@ class FilterFragment : BindingFragment<FragmentFilterBinding>() {
         viewModel.getIsFiltersDefault().observe(viewLifecycleOwner) { isDefault ->
             binding.includedBtnCancel.root.isVisible = !isDefault
         }
-    }
-
-    private fun initUiToolbar() {
-        binding.topbar.btnFirst.setOnClickListener {
-            closeFragment(true)
-        }
+        binding.includedSalary.textFieldEdit.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) = Unit
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                binding.includedSalary.textFieldClear.isVisible = p0.toString().isNotEmpty()
+            }
+            override fun afterTextChanged(p0: Editable?) = Unit
+        })
     }
 
     private fun closeFragment(barVisibility: Boolean) {
