@@ -1,10 +1,13 @@
 package ru.practicum.android.diploma.ui.filter.industry
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.navigation.fragment.findNavController
@@ -28,6 +31,7 @@ class IndustryFilterFragment : BindingFragment<FragmentIndustryFilterBinding>() 
         return FragmentIndustryFilterBinding.inflate(inflater, container, false)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -36,9 +40,32 @@ class IndustryFilterFragment : BindingFragment<FragmentIndustryFilterBinding>() 
 
         binding.industrySearch.searchEditText.addTextChangedListener(
             onTextChanged = { text, _, _, _ ->
+                val hasText = !text.isNullOrEmpty()
+                val icon = if (hasText) {
+                    ContextCompat.getDrawable(requireContext(), R.drawable.close_24px)
+                } else {
+                    ContextCompat.getDrawable(requireContext(), R.drawable.search_24px)
+                }
+
+                binding.industrySearch.searchEditText.setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null)
                 viewModel.filterIndustries(text.toString())
             }
         )
+
+        binding.industrySearch.searchEditText.setOnTouchListener { v, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                val drawableEnd = binding.industrySearch.searchEditText.compoundDrawables[2]
+                if (drawableEnd != null) {
+                    val touchX = event.x
+                    val drawableStart = binding.industrySearch.searchEditText.width - binding.industrySearch.searchEditText.paddingEnd - drawableEnd.bounds.width()
+                    if (touchX >= drawableStart) {
+                        binding.industrySearch.searchEditText.text.clear()
+                        return@setOnTouchListener true
+                    }
+                }
+            }
+            false
+        }
 
         args.selectedIndustryId?.let { viewModel.setPreselectedIndustryId(it) }
         viewModel.getIndustries()
