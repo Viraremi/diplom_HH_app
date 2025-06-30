@@ -42,8 +42,12 @@ class IndustryViewModel(
                 )
             }
             _industryState.postValue(
-                if (listItems.isEmpty()) IndustryState.EMPTY
-                else IndustryState.CONTENT(listItems)
+                if (listItems.isEmpty()) {
+                    IndustryState.EMPTY
+                }
+                else {
+                    IndustryState.CONTENT(listItems)
+                }
             )
         } else if (error != null) {
             _industryState.postValue(IndustryState.ERROR(error))
@@ -68,8 +72,12 @@ class IndustryViewModel(
             item.name.contains(query.trim(), ignoreCase = true)
         }
         _industryState.postValue(
-            if (filteredList.isEmpty()) IndustryState.EMPTY
-            else IndustryState.CONTENT(filteredList)
+            if (filteredList.isEmpty()) {
+                IndustryState.EMPTY
+            }
+            else {
+                IndustryState.CONTENT(filteredList)
+            }
         )
     }
 
