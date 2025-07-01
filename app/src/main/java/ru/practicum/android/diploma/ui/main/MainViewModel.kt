@@ -70,10 +70,11 @@ class MainViewModel(
     fun onTextChange(value: String) {
         if (textSearching != value && value.isNotEmpty()) {
             textSearching = value
-            textLiveData.postValue(value)
-
             doSearchDebounced(Unit)
+        } else {
+            contentStateLiveData.postValue(SearchContentStateVO.Base)
         }
+        textLiveData.postValue(value)
     }
 
     fun onSearchClear() {
