@@ -41,7 +41,13 @@ class IndustryViewModel(
                     isSelected = item.id == preselectedIndustryId
                 )
             }
-            _industryState.postValue(IndustryState.CONTENT(listItems))
+            _industryState.postValue(
+                if (listItems.isEmpty()) {
+                    IndustryState.EMPTY
+                } else {
+                    IndustryState.CONTENT(listItems)
+                }
+            )
         } else if (error != null) {
             _industryState.postValue(IndustryState.ERROR(error))
         } else {
@@ -64,7 +70,13 @@ class IndustryViewModel(
         val filteredList = fullIndustryList.filter { item ->
             item.name.contains(query.trim(), ignoreCase = true)
         }
-        _industryState.postValue(IndustryState.CONTENT(filteredList))
+        _industryState.postValue(
+            if (filteredList.isEmpty()) {
+                IndustryState.EMPTY
+            } else {
+                IndustryState.CONTENT(filteredList)
+            }
+        )
     }
 
     fun getSelectedIndustry(): IndustryListItem? {
