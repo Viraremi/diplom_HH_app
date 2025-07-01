@@ -52,18 +52,28 @@ class NetworkClient(
     }
 
     private suspend fun responseDetail(dto: VacancyDetailRequest): Response {
-        return try {
+        return runCatching {
             val response = hhApi.getVacancyDetails(dto.id)
             response.apply { resultCode = HTTP_200_OK }
-        } catch (e: HttpException) {
-            Log.e(LOG_TAG, ERROR_LOG_MESSAGE, e)
-            Response().apply { resultCode = e.code() }
-        } catch (e: IOException) {
-            Log.e(LOG_TAG, ERROR_LOG_MESSAGE, e)
-            Response().apply { resultCode = HTTP_NO_CONNECTION }
-        } catch (e: Exception) {
-            Log.e(LOG_TAG, ERROR_LOG_MESSAGE, e)
-            Response().apply { resultCode = HTTP_500_INTERNAL_SERVER_ERROR }
+        }.getOrElse { e ->
+            handleException(e)
+        }
+    }
+
+    private fun handleException(e: Throwable): Response {
+        return when (e) {
+            is HttpException -> {
+                Log.e(LOG_TAG, ERROR_LOG_MESSAGE, e)
+                Response().apply { resultCode = e.code() }
+            }
+            is IOException -> {
+                Log.e(LOG_TAG, ERROR_LOG_MESSAGE, e)
+                Response().apply { resultCode = HTTP_NO_CONNECTION }
+            }
+            else -> {
+                Log.e(LOG_TAG, ERROR_LOG_MESSAGE, e)
+                Response().apply { resultCode = HTTP_500_INTERNAL_SERVER_ERROR }
+            }
         }
     }
 
