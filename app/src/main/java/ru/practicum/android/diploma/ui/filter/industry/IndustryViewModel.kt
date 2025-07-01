@@ -33,7 +33,6 @@ class IndustryViewModel(
     private fun processIndustriesResult(industries: List<Industries>?, error: Int?) {
         if (industries != null) {
             val industryListItems = industries.toIndustryListItems()
-            fullIndustryList = industryListItems
             val listItems = industryListItems.map { item ->
                 IndustryListItem(
                     id = item.id,
@@ -41,6 +40,9 @@ class IndustryViewModel(
                     isSelected = item.id == preselectedIndustryId
                 )
             }
+
+            fullIndustryList = listItems
+
             _industryState.postValue(
                 if (listItems.isEmpty()) {
                     IndustryState.EMPTY
