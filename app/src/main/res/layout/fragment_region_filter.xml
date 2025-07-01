@@ -99,8 +99,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin16"
             android:fontFamily="@font/ys_display_medium"
-
-            android:gravity="center_horizontal"
+            android:gravity="center_horizontal|top"
             android:textSize="@dimen/text_size_l"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

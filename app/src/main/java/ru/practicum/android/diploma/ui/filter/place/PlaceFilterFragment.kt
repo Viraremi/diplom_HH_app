@@ -19,8 +19,6 @@ import ru.practicum.android.diploma.ui.filter.place.models.Region
 import ru.practicum.android.diploma.ui.filter.place.region.RegionFilterFragment
 import ru.practicum.android.diploma.ui.root.BindingFragment
 import ru.practicum.android.diploma.ui.root.RootActivity
-import ru.practicum.android.diploma.util.COUNTRY_KEY
-import ru.practicum.android.diploma.util.REGION_KEY
 import ru.practicum.android.diploma.util.getSerializable
 
 class PlaceFilterFragment : BindingFragment<FragmentPlaceFilterBinding>() {
