@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
+import android.view.View
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.ui.filter.model.SelectedFilters
 import java.io.Serializable
@@ -57,5 +58,38 @@ fun <T : Serializable?> getSerializable(bundle: Bundle, name: String, clazz: Cla
         }
     } catch (_: NullPointerException) {
         null
+    }
+}
+
+fun formatSalary(itemView: View, salaryFrom: Int?, salaryTo: Int?, salaryCurr: String): String {
+    if (salaryFrom == null && salaryTo == null) {
+        return itemView.context.getString(R.string.salary_not_specified)
+    }
+
+    val formattedFrom = salaryFrom?.let { "%,d".format(it).replace(',', ' ') }
+    val formattedTo = salaryTo?.let { "%,d".format(it).replace(',', ' ') }
+
+    return when {
+        formattedFrom != null && formattedTo != null ->
+            itemView.context.getString(
+                R.string.salary_range,
+                formattedFrom,
+                formattedTo,
+                getCurrSymbol(itemView.context, salaryCurr)
+            )
+
+        formattedFrom != null ->
+            itemView.context.getString(
+                R.string.salary_from,
+                formattedFrom,
+                getCurrSymbol(itemView.context, salaryCurr)
+            )
+
+        else ->
+            itemView.context.getString(
+                R.string.salary_to,
+                formattedTo,
+                getCurrSymbol(itemView.context, salaryCurr)
+            )
     }
 }
