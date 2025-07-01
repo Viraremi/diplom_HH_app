@@ -56,13 +56,13 @@ class NetworkClient(
             val response = hhApi.getVacancyDetails(dto.id)
             response.apply { resultCode = HTTP_200_OK }
         } catch (e: HttpException) {
-            Log.e("NetworkClient", "Unexpected error in doRequest", e)
+            Log.e(LOG_TAG, ERROR_LOG_MESSAGE, e)
             Response().apply { resultCode = e.code() }
         } catch (e: IOException) {
-            Log.e("NetworkClient", "Unexpected error in doRequest", e)
+            Log.e(LOG_TAG, ERROR_LOG_MESSAGE, e)
             Response().apply { resultCode = HTTP_NO_CONNECTION }
         } catch (e: Exception) {
-            Log.e("NetworkClient", "Unexpected error in doRequest", e)
+            Log.e(LOG_TAG, ERROR_LOG_MESSAGE, e)
             Response().apply { resultCode = HTTP_500_INTERNAL_SERVER_ERROR }
         }
     }
@@ -79,5 +79,10 @@ class NetworkClient(
         return IndustriesResponse(
             industries = hhApi.getIndustries()
         ).apply { resultCode = HTTP_200_OK }
+    }
+
+    private companion object {
+        private const val LOG_TAG = "NetworkClient"
+        private const val ERROR_LOG_MESSAGE = "Unexpected error in doRequest"
     }
 }
