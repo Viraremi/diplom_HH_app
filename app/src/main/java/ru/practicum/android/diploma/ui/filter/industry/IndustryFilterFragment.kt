@@ -1,10 +1,13 @@
 package ru.practicum.android.diploma.ui.filter.industry
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.navigation.fragment.findNavController
@@ -28,15 +31,47 @@ class IndustryFilterFragment : BindingFragment<FragmentIndustryFilterBinding>() 
         return FragmentIndustryFilterBinding.inflate(inflater, container, false)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.industrySearch.searchEditText.hint = getString(R.string.enter_industry)
         binding.buttonActionIndustry.buttonBlue.text = getString(R.string.select)
 
-        binding.industrySearch.searchEditText.addTextChangedListener(
+        val editText = binding.industrySearch.searchEditText
+
+        editText.addTextChangedListener(
             onTextChanged = { text, _, _, _ ->
+                val hasText = !text.isNullOrEmpty()
+                val icon = if (hasText) {
+                    ContextCompat.getDrawable(requireContext(), R.drawable.close_24px)
+                } else {
+                    ContextCompat.getDrawable(requireContext(), R.drawable.search_24px)
+                }
+
+                editText.setCompoundDrawablesWithIntrinsicBounds(null, null, icon, null)
                 viewModel.filterIndustries(text.toString())
+            }
+        )
+
+        editText.setOnTouchListener(
+            @SuppressLint("ClickableViewAccessibility")
+            object : View.OnTouchListener {
+                override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                    if (event?.action == MotionEvent.ACTION_UP) {
+                        val drawableEnd = editText.compoundDrawables[2]
+                        if (drawableEnd != null) {
+                            val touchX = event.x
+                            val drawableStart = editText.width - editText.paddingEnd - drawableEnd.bounds.width()
+                            if (touchX >= drawableStart) {
+                                editText.text.clear()
+                                v?.performClick()
+                                return true
+                            }
+                        }
+                    }
+                    return false
+                }
             }
         )
 

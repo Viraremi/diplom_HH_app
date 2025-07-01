@@ -26,14 +26,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/margin16"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/topbar"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/topbar">
 
         <!-- items для еще не выбранных пунктов -->
         <include
@@ -41,7 +41,7 @@
             layout="@layout/list_location_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible"/>
+            android:visibility="visible" />
 
         <!-- items для уже выбранных пунктов-->
         <include
@@ -49,22 +49,21 @@
             layout="@layout/selected_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"/>
-            />
+            android:visibility="gone" />
 
         <include
             android:id="@+id/region_item"
             layout="@layout/list_location_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible"/>
+            android:visibility="visible" />
 
         <include
             android:id="@+id/selected_region"
             layout="@layout/selected_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
     </LinearLayout>
 
