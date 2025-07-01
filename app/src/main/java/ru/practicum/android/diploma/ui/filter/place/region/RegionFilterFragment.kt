@@ -121,13 +121,10 @@ class RegionFilterFragment : BindingFragment<FragmentRegionFilterBinding>() {
 
         textFilter.performClick()
 
-        textFilter.setOnTouchListener (
+        textFilter.setOnTouchListener(
             object : OnTouchListener {
                 override fun onTouch(v: View, event: MotionEvent?): Boolean {
                     val drawableEnd = textFilter.compoundDrawables[2]
-                    if(drawableEnd == null) {
-                        return false
-                    }
                     if (event?.action == MotionEvent.ACTION_UP) {
                         event.x.let {
                             if (it >= textFilter.width - drawableEnd.bounds.width() - textFilter.paddingEnd) {
