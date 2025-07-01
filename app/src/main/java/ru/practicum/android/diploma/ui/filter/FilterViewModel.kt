@@ -177,14 +177,11 @@ class FilterViewModel(
     }
 
     companion object {
-        private const val DEFAUlT_INDUSTRY_ID = ""
-        private const val DEFAULT_INDUSTRY_NAME = ""
-
         private val DEFAULT_FILTERS = SelectedFilters(
             null,
             null,
-            DEFAUlT_INDUSTRY_ID,
-            DEFAULT_INDUSTRY_NAME,
+            null,
+            null,
             null,
             false
         )
