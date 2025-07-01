@@ -52,15 +52,19 @@ class MainViewModel(
 
     fun forceSearch() {
         page = 0
-        resetSearchState()
         doSearch()
     }
 
-    private fun resetSearchState() {
+    fun hasSearchQuery(): Boolean {
+        return !textSearching.isNullOrEmpty()
+    }
+
+    fun clearResults() {
         vacanciesList.clear()
         found = 0
         pages = 0
         page = 0
+        contentStateLiveData.postValue(SearchContentStateVO.Base)
     }
 
     fun onTextChange(value: String) {
@@ -105,6 +109,12 @@ class MainViewModel(
         }
 
         val filters = selectedFilters ?: SelectedFilters(null, null, null, null, null, false)
+
+        if (page == 0) {
+            vacanciesList.clear()
+            found = 0
+            pages = 0
+        }
 
         contentStateLiveData.postValue(SearchContentStateVO.Loading(page == 0))
 

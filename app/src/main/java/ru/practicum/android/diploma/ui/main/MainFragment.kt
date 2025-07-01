@@ -69,14 +69,12 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
     }
 
     private fun observeFilterApplyResult() {
-        findNavController().currentBackStackEntry?.savedStateHandle
+        findNavController().currentBackStackEntry
+            ?.savedStateHandle
             ?.getLiveData<Boolean>("filters_applied")
             ?.observe(viewLifecycleOwner) { applied ->
-                if (applied == true) {
-                    findNavController().currentBackStackEntry?.savedStateHandle
-                        ?.remove<Boolean>("filters_applied")
-
-                    viewModel.forceSearch()
+                if (applied == true && viewModel.hasSearchQuery()) {
+                    resetSearch()
                 }
             }
     }
@@ -160,7 +158,6 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
         }
     }
 
-    //  callback для системной кн назад - выход из приложения
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             requireActivity().finish()
@@ -199,6 +196,12 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
         return false
     }
 
+    private fun resetSearch() {
+        vacanciesAdapter?.submitList(emptyList())
+        viewModel.clearResults()
+        viewModel.forceSearch()
+    }
+
     private fun onSearchClear() {
         binding.searchEditText.clearFocus()
 
@@ -225,6 +228,10 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
     }
 
     private fun showLoadingState(firstSearch: Boolean) {
+        if (firstSearch) {
+            vacanciesAdapter?.submitList(emptyList())
+        }
+
         binding.searchBaseState.isVisible = false
         binding.noInternetError.isVisible = false
         binding.unknownError.isVisible = false
