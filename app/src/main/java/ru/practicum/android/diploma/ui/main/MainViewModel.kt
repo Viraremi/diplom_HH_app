@@ -50,6 +50,19 @@ class MainViewModel(
     private val showNoInternetToast = SingleLiveEvent<Unit>()
     fun observeShowNoInternetToast(): LiveData<Unit> = showNoInternetToast
 
+    fun forceSearch() {
+        page = 0
+        resetSearchState()
+        doSearch()
+    }
+
+    private fun resetSearchState() {
+        vacanciesList.clear()
+        found = 0
+        pages = 0
+        page = 0
+    }
+
     fun onTextChange(value: String) {
         if (textSearching != value && value.isNotEmpty()) {
             textSearching = value

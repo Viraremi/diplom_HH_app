@@ -187,6 +187,7 @@ class FilterFragment : BindingFragment<FragmentFilterBinding>() {
         binding.includedBtnSet.root.setOnClickListener {
             viewModel.setSalary(binding.includedSalary.textFieldEdit.text.toString().toIntOrNull())
             viewModel.saveFilters()
+            findNavController().previousBackStackEntry?.savedStateHandle?.set("filters_applied", true)
             findNavController().popBackStack()
         }
 
