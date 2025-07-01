@@ -76,6 +76,16 @@ class PlaceFilterFragment : BindingFragment<FragmentPlaceFilterBinding>() {
             placeViewModel.responseRegion()
         }
 
+        binding.selectedCountry.root.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_placeFilterFragment_to_countryFilterFragment
+            )
+        }
+
+        binding.selectedRegion.root.setOnClickListener {
+            placeViewModel.responseRegion()
+        }
+
         binding.selectedCountry.selectedItemClose.setOnClickListener {
             placeViewModel.changeCountry(null)
         }
