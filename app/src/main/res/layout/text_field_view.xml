@@ -1,7 +1,5 @@
 <!-- res/layout/view_search.xml -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -12,6 +10,8 @@
         android:layout_marginVertical="@dimen/margin16"
         android:background="@drawable/rounded_edittext"
         android:backgroundTint="?attr/colorSecondary"
+        android:clickable="true"
+        android:drawableEnd="@drawable/search_24px"
         android:drawablePadding="@dimen/margin16"
         android:drawableTint="@color/black"
         android:imeOptions="actionDone"
@@ -22,6 +22,5 @@
         android:textColor="@color/black"
         android:textColorHint="?attr/colorOnSecondary"
         android:textCursorDrawable="@drawable/edit_text_cursor"
-        android:drawableEnd="@drawable/search_24px"
         android:textSize="@dimen/text_size_m" />
 </FrameLayout>

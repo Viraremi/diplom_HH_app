@@ -88,7 +88,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin16"
             android:fontFamily="@font/ys_display_medium"
-            android:gravity="center"
+            android:gravity="center_horizontal|top"
             android:textSize="@dimen/text_size_l"
             tools:text="@string/no_region" />
     </LinearLayout>

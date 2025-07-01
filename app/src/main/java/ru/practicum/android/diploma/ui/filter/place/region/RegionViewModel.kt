@@ -83,11 +83,15 @@ class RegionViewModel(
     }
 
     fun onFiltered(text: String) {
-        val filteredList = regionList.filter { it.name.contains(text, ignoreCase = true) }
-        if (filteredList.isEmpty()) {
-            render(RegionState.NotFound)
+        if (text.isEmpty()) {
+            render(RegionState.Content(regionList))
         } else {
-            render(RegionState.Content(filteredList))
+            val filteredList = regionList.filter { it.name.contains(text, ignoreCase = true) }
+            if (filteredList.isEmpty()) {
+                render(RegionState.NotFound)
+            } else {
+                render(RegionState.Content(filteredList))
+            }
         }
     }
 

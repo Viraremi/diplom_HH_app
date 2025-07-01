@@ -18,13 +18,13 @@ import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentFilterBinding
 import ru.practicum.android.diploma.ui.filter.model.FilterScreenState
 import ru.practicum.android.diploma.ui.filter.model.SelectedFilters
+import ru.practicum.android.diploma.ui.filter.place.COUNTRY_KEY
 import ru.practicum.android.diploma.ui.filter.place.PlaceFilterFragment
+import ru.practicum.android.diploma.ui.filter.place.REGION_KEY
 import ru.practicum.android.diploma.ui.filter.place.models.Country
 import ru.practicum.android.diploma.ui.filter.place.models.Region
 import ru.practicum.android.diploma.ui.root.BindingFragment
 import ru.practicum.android.diploma.ui.root.RootActivity
-import ru.practicum.android.diploma.util.COUNTRY_KEY
-import ru.practicum.android.diploma.util.REGION_KEY
 import ru.practicum.android.diploma.util.formatPlace
 
 class FilterFragment : BindingFragment<FragmentFilterBinding>() {
@@ -77,6 +77,7 @@ class FilterFragment : BindingFragment<FragmentFilterBinding>() {
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 binding.includedSalary.textFieldClear.isVisible = p0.toString().isNotEmpty()
             }
+
             override fun afterTextChanged(p0: Editable?) = Unit
         })
     }

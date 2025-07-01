@@ -8,8 +8,8 @@ import ru.practicum.android.diploma.ui.filter.place.models.PlaceState
 import ru.practicum.android.diploma.ui.filter.place.models.Region
 
 class PlaceViewModel(
-    private val country: Country?,
-    private val region: Region?
+    country: Country?,
+    region: Region?
 ) : ViewModel() {
     private var countryLocal: Country? = null
     private var regionLocal: Region? = null
