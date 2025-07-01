@@ -193,7 +193,6 @@ class FilterFragment : BindingFragment<FragmentFilterBinding>() {
         binding.includedBtnCancel.root.setOnClickListener {
             viewModel.clearFilters()
             viewModel.saveFilters()
-            findNavController().popBackStack()
         }
     }
 
