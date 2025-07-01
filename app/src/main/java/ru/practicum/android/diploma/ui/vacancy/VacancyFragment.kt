@@ -19,6 +19,8 @@ import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentVacancyBinding
 import ru.practicum.android.diploma.ui.root.BindingFragment
 import ru.practicum.android.diploma.ui.root.RootActivity
+import ru.practicum.android.diploma.util.HTTP_500_INTERNAL_SERVER_ERROR
+import ru.practicum.android.diploma.util.HTTP_NO_CONNECTION
 
 class VacancyFragment : BindingFragment<FragmentVacancyBinding>() {
     private val viewModel by viewModel<VacancyViewModel>()
@@ -100,7 +102,7 @@ class VacancyFragment : BindingFragment<FragmentVacancyBinding>() {
         when (state) {
             is VacancyContentStateVO.Base -> showBase()
             is VacancyContentStateVO.Loading -> showLoading()
-            is VacancyContentStateVO.Error -> showError()
+            is VacancyContentStateVO.Error -> showError(state.code)
             is VacancyContentStateVO.Success -> showVacancyDetails(state.vacancy)
             is VacancyContentStateVO.SetFavorite -> setFavoriteIcon(state.isFavorite)
         }
@@ -114,12 +116,28 @@ class VacancyFragment : BindingFragment<FragmentVacancyBinding>() {
         binding.contentView.isVisible = false
         binding.includedProgressBar.progressBar.isVisible = true
         binding.includedErr.root.isVisible = false
+        binding.noInternetError.isVisible = false
+        binding.serverError.isVisible = false
     }
 
-    private fun showError() {
+    private fun showError(code: Int) {
         binding.contentView.isVisible = false
         binding.includedProgressBar.root.isVisible = false
-        binding.includedErr.root.isVisible = true
+        binding.noInternetError.isVisible = false
+        binding.serverError.isVisible = false
+        binding.includedErr.root.isVisible = false
+
+        when (code) {
+            HTTP_NO_CONNECTION -> {
+                binding.noInternetError.isVisible = true
+            }
+            HTTP_500_INTERNAL_SERVER_ERROR -> {
+                binding.serverError.isVisible = true
+            }
+            else -> {
+                binding.includedErr.root.isVisible = true
+            }
+        }
     }
 
     private fun showVacancyDetails(vacancy: VacancyDetailsVO) {
@@ -153,6 +171,8 @@ class VacancyFragment : BindingFragment<FragmentVacancyBinding>() {
             includedProgressBar.root.isVisible = false
             includedErr.root.isVisible = false
             contentView.isVisible = true
+            noInternetError.isVisible = false
+            serverError.isVisible = false
         }
     }
 
