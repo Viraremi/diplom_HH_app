@@ -42,6 +42,8 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
 
         initUiToolbar()
 
+        observeFilterApplyResult()
+
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             backPressedCallback
@@ -64,6 +66,19 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
         setObservers()
         initSearch()
         setAdapter()
+    }
+
+    private fun observeFilterApplyResult() {
+        findNavController().currentBackStackEntry?.savedStateHandle
+            ?.getLiveData<Boolean>("filters_applied")
+            ?.observe(viewLifecycleOwner) { applied ->
+                if (applied == true) {
+                    findNavController().currentBackStackEntry?.savedStateHandle
+                        ?.remove<Boolean>("filters_applied")
+
+                    viewModel.forceSearch()
+                }
+            }
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
