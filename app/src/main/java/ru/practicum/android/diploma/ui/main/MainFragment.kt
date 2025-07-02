@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -13,6 +14,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
@@ -20,17 +22,19 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentMainBinding
 import ru.practicum.android.diploma.domain.vacancy.models.Vacancy
-import ru.practicum.android.diploma.ui.main.adapters.SearchResultsAdapter
+import ru.practicum.android.diploma.ui.main.adapters.SearchAdapter
 import ru.practicum.android.diploma.ui.main.models.SearchContentStateVO
 import ru.practicum.android.diploma.ui.root.BindingFragment
+import ru.practicum.android.diploma.ui.root.ListCallback
 import ru.practicum.android.diploma.ui.root.RootActivity
 import ru.practicum.android.diploma.ui.vacancy.VacancyFragment
+import ru.practicum.android.diploma.util.HH_LOG
 
 class MainFragment : BindingFragment<FragmentMainBinding>() {
 
     private val viewModel by viewModel<MainViewModel>()
 
-    private var vacanciesAdapter: SearchResultsAdapter? = null
+    private var vacanciesAdapter: SearchAdapter? = null
 
     override fun createBinding(inflater: LayoutInflater, container: ViewGroup?): FragmentMainBinding {
         return FragmentMainBinding.inflate(inflater, container, false)
@@ -42,25 +46,46 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
 
         initUiToolbar()
 
+        observeFilterApplyResult()
+
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             backPressedCallback
         )
 
-        vacanciesAdapter = SearchResultsAdapter(
+        vacanciesAdapter = SearchAdapter(
             clickListener = { vacancy ->
                 (activity as RootActivity).setNavBarVisibility(false)
                 findNavController().navigate(
                     R.id.action_mainFragment_to_vacancyFragment,
                     VacancyFragment.createArgs(vacancy.id)
                 )
-            },
+            }
         )
 
         viewModel.contentState.observe(viewLifecycleOwner) {
             renderContent(it)
         }
 
+        setObservers()
+        initSearch()
+        setAdapter()
+        viewModel.start()
+    }
+
+    private fun observeFilterApplyResult() {
+        findNavController().currentBackStackEntry
+            ?.savedStateHandle
+            ?.getLiveData<Boolean>("filters_applied")
+            ?.observe(viewLifecycleOwner) { applied ->
+                if (applied == true && viewModel.hasSearchQuery()) {
+                    resetSearch()
+                }
+            }
+    }
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private fun setObservers() {
         viewModel.text.observe(viewLifecycleOwner) {
             val withClose = it.isNotEmpty()
 
@@ -102,9 +127,9 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
                 Toast.LENGTH_LONG,
             ).show()
         }
+    }
 
-        initSearch()
-
+    private fun setAdapter() {
         binding.searchResults.adapter = vacanciesAdapter
         binding.searchResults.addOnScrollListener(object : OnScrollListener() {
             override fun onScrolled(
@@ -138,7 +163,6 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
         }
     }
 
-    //  callback для системной кн назад - выход из приложения
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             requireActivity().finish()
@@ -177,6 +201,24 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
         return false
     }
 
+    private fun resetSearch() {
+        refreshList(emptyList())
+        viewModel.clearResults()
+        viewModel.forceSearch()
+    }
+
+    private fun refreshList(newList: List<Vacancy>) {
+        Log.d(HH_LOG, "ListSize=${newList.size}")
+        vacanciesAdapter?.let {
+            val diffSearchCallback = ListCallback(it.vacancies, newList)
+            val diffSearch = DiffUtil.calculateDiff(diffSearchCallback)
+            it.vacancies.clear()
+            it.vacancies.addAll(newList)
+            diffSearch.dispatchUpdatesTo(it)
+        }
+
+    }
+
     private fun onSearchClear() {
         binding.searchEditText.clearFocus()
 
@@ -203,6 +245,10 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
     }
 
     private fun showLoadingState(firstSearch: Boolean) {
+        if (firstSearch) {
+            refreshList(emptyList())
+        }
+
         binding.searchBaseState.isVisible = false
         binding.noInternetError.isVisible = false
         binding.unknownError.isVisible = false
@@ -212,11 +258,8 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
     }
 
     private fun showSearchResults(newVacancies: List<Vacancy>, found: Int) {
-        vacanciesAdapter?.submitList(newVacancies) {
-            // Будет вызван после завершения диффа и обновления UI
-            binding.searchResults.isVisible = found > 0
-        }
-
+        refreshList(newVacancies)
+        binding.searchResults.isVisible = found > 0
         binding.searchBaseState.isVisible = false
         binding.progress.isVisible = false
         binding.progressPages.isVisible = false
@@ -243,7 +286,6 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
 
     override fun onResume() {
         super.onResume()
-
         viewModel.onResume()
     }
 }

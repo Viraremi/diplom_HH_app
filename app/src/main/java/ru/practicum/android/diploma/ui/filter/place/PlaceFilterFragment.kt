@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
@@ -18,8 +19,6 @@ import ru.practicum.android.diploma.ui.filter.place.models.Region
 import ru.practicum.android.diploma.ui.filter.place.region.RegionFilterFragment
 import ru.practicum.android.diploma.ui.root.BindingFragment
 import ru.practicum.android.diploma.ui.root.RootActivity
-import ru.practicum.android.diploma.util.COUNTRY_KEY
-import ru.practicum.android.diploma.util.REGION_KEY
 import ru.practicum.android.diploma.util.getSerializable
 
 class PlaceFilterFragment : BindingFragment<FragmentPlaceFilterBinding>() {
@@ -63,7 +62,10 @@ class PlaceFilterFragment : BindingFragment<FragmentPlaceFilterBinding>() {
             closeFragment(false)
         }
         initTopbar()
+        setListeners()
+    }
 
+    private fun setListeners() {
         binding.countryItem.listLocationItem.setOnClickListener {
             findNavController().navigate(
                 R.id.action_placeFilterFragment_to_countryFilterFragment
@@ -71,6 +73,16 @@ class PlaceFilterFragment : BindingFragment<FragmentPlaceFilterBinding>() {
         }
 
         binding.regionItem.listLocationItem.setOnClickListener {
+            placeViewModel.responseRegion()
+        }
+
+        binding.selectedCountry.root.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_placeFilterFragment_to_countryFilterFragment
+            )
+        }
+
+        binding.selectedRegion.root.setOnClickListener {
             placeViewModel.responseRegion()
         }
 
@@ -163,8 +175,14 @@ class PlaceFilterFragment : BindingFragment<FragmentPlaceFilterBinding>() {
     }
 
     private fun changeTitles() {
-        binding.countryItem.listLocationItem.text = getString(R.string.country_text)
-        binding.regionItem.listLocationItem.text = getString(R.string.region_text)
+        binding.countryItem.listLocationItem.apply {
+            text = getString(R.string.country_text)
+            setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
+        }
+        binding.regionItem.listLocationItem.apply {
+            text = getString(R.string.region_text)
+            setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
+        }
         binding.selectedCountry.nameOfSelected.text = getString(R.string.country_text)
         binding.selectedRegion.nameOfSelected.text = getString(R.string.region_text)
     }

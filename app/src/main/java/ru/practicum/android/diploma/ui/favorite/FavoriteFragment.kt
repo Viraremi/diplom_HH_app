@@ -16,9 +16,9 @@ import ru.practicum.android.diploma.databinding.FragmentFavoriteBinding
 import ru.practicum.android.diploma.domain.models.VacancyDetails
 import ru.practicum.android.diploma.ui.favorite.adapters.FavoriteAdapter
 import ru.practicum.android.diploma.ui.favorite.models.FavoriteState
-import ru.practicum.android.diploma.ui.favorite.utils.VacanciesCallback
 import ru.practicum.android.diploma.ui.favorite.viewmodel.FavoriteViewModel
 import ru.practicum.android.diploma.ui.root.BindingFragment
+import ru.practicum.android.diploma.ui.root.ListCallback
 import ru.practicum.android.diploma.ui.root.RootActivity
 import ru.practicum.android.diploma.ui.vacancy.VacancyFragment
 import ru.practicum.android.diploma.util.debounce
@@ -92,7 +92,7 @@ class FavoriteFragment : BindingFragment<FragmentFavoriteBinding>() {
         binding.placeholder.isVisible = false
         binding.progress.isVisible = false
         favoriteAdapter?.let {
-            val diffCallback = VacanciesCallback(it.vacancies.toList(), vacancies)
+            val diffCallback = ListCallback(it.vacancies.toList(), vacancies)
             val diffVacancies = DiffUtil.calculateDiff(diffCallback)
             it.vacancies.clear()
             it.vacancies.addAll(vacancies)

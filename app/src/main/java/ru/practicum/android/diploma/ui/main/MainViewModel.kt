@@ -1,33 +1,31 @@
 package ru.practicum.android.diploma.ui.main
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import ru.practicum.android.diploma.data.network.ApiResponse
-import ru.practicum.android.diploma.domain.api.FilterPreferences
+import ru.practicum.android.diploma.domain.api.FilterPreferencesInteractor
 import ru.practicum.android.diploma.domain.models.FilterOptions
 import ru.practicum.android.diploma.domain.vacancy.api.SearchVacanciesRepository
 import ru.practicum.android.diploma.domain.vacancy.models.Vacancy
 import ru.practicum.android.diploma.ui.common.SingleLiveEvent
 import ru.practicum.android.diploma.ui.filter.model.SelectedFilters
 import ru.practicum.android.diploma.ui.main.models.SearchContentStateVO
-import ru.practicum.android.diploma.ui.main.utils.toFilterOptions
+import ru.practicum.android.diploma.util.HH_LOG
 import ru.practicum.android.diploma.util.debounce
 
 class MainViewModel(
     private val searchVacanciesRepository: SearchVacanciesRepository,
-    private val filterPreferences: FilterPreferences
+    private val filterPreferences: FilterPreferencesInteractor
 ) : ViewModel() {
     private var selectedFilters: SelectedFilters? = null
+    private var textSearching: String? = null
 
     private val textLiveData = MutableLiveData("")
     val text: LiveData<String> = textLiveData
-
-    init {
-        selectedFilters = filterPreferences.loadFilters()
-    }
 
     private val vacanciesList = ArrayList<Vacancy>()
     private var found = 0
@@ -50,10 +48,35 @@ class MainViewModel(
     private val showNoInternetToast = SingleLiveEvent<Unit>()
     fun observeShowNoInternetToast(): LiveData<Unit> = showNoInternetToast
 
-    fun onTextChange(value: String) {
-        textLiveData.postValue(value)
+    fun start() {
+        selectedFilters = filterPreferences.loadFilters()
+    }
 
-        doSearchDebounced(Unit)
+    fun forceSearch() {
+        page = 0
+        doSearch()
+    }
+
+    fun hasSearchQuery(): Boolean {
+        return !textSearching.isNullOrEmpty()
+    }
+
+    fun clearResults() {
+        vacanciesList.clear()
+        found = 0
+        pages = 0
+        page = 0
+        contentStateLiveData.postValue(SearchContentStateVO.Base)
+    }
+
+    fun onTextChange(value: String) {
+        if (textSearching != value && value.isNotEmpty()) {
+            textSearching = value
+            doSearchDebounced(Unit)
+        } else {
+            contentStateLiveData.postValue(SearchContentStateVO.Base)
+        }
+        textLiveData.postValue(value)
     }
 
     fun onSearchClear() {
@@ -88,13 +111,13 @@ class MainViewModel(
             return
         }
 
-        // добавил метод, который должен собирать filterOptions. Нужно теперь его скорректировать
         val filters = selectedFilters ?: SelectedFilters(null, null, null, null, null, false)
-        val filterOptions = filters.toFilterOptions(
-            searchText = text,
-            currency = "",
-            page = page
-        )
+
+        if (page == 0) {
+            vacanciesList.clear()
+            found = 0
+            pages = 0
+        }
 
         contentStateLiveData.postValue(SearchContentStateVO.Loading(page == 0))
 
@@ -102,7 +125,7 @@ class MainViewModel(
             FilterOptions(
                 searchText = text,
                 area = filters.region?.id ?: filters.country?.id ?: "",
-                industry = filters.industry ?: "",
+                industry = filters.industryId ?: "",
                 salary = filters.salary,
                 onlyWithSalary = filters.onlyWithSalary,
                 page = page
@@ -116,6 +139,7 @@ class MainViewModel(
 
     private fun search(options: FilterOptions) {
         viewModelScope.launch {
+            Log.d(HH_LOG, "Search: ${options.searchText} \n ${options.area}")
             handleSearch(options)
         }
     }
@@ -145,12 +169,10 @@ class MainViewModel(
             } else {
                 showErrorToast.postValue(Unit)
             }
-
             contentStateLiveData.postValue(SearchContentStateVO.Success(vacanciesList, found))
 
             return
         }
-
         contentStateLiveData.postValue(
             when (searchResponse) {
                 is ApiResponse.Success -> {

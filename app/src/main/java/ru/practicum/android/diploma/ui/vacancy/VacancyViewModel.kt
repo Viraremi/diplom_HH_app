@@ -10,6 +10,7 @@ import ru.practicum.android.diploma.data.network.ApiResponse
 import ru.practicum.android.diploma.domain.db.FavoriteInteractor
 import ru.practicum.android.diploma.domain.models.VacancyDetails
 import ru.practicum.android.diploma.domain.vacancy.api.VacancyDetailsRepository
+import ru.practicum.android.diploma.util.HTTP_400_BAD_REQUEST
 
 class VacancyViewModel(
     private val repository: VacancyDetailsRepository,
@@ -66,7 +67,7 @@ class VacancyViewModel(
             }
 
             is ApiResponse.Error -> {
-                _vacancyState.value = VacancyContentStateVO.Error
+                _vacancyState.value = VacancyContentStateVO.Error(result.statusCode ?: HTTP_400_BAD_REQUEST)
             }
         }
     }
@@ -77,7 +78,7 @@ class VacancyViewModel(
             val vo = mapper.run { vacancy.toVO() }
             _vacancyState.value = VacancyContentStateVO.Success(vo)
         } else {
-            _vacancyState.value = VacancyContentStateVO.Error
+            _vacancyState.value = VacancyContentStateVO.Error(HTTP_400_BAD_REQUEST)
         }
     }
 }

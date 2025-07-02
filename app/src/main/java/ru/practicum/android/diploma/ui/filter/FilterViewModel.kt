@@ -3,29 +3,72 @@ package ru.practicum.android.diploma.ui.filter
 import android.content.Context
 import androidx.core.view.isVisible
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentFilterBinding
-import ru.practicum.android.diploma.domain.api.FilterPreferences
+import ru.practicum.android.diploma.domain.api.FilterPreferencesInteractor
 import ru.practicum.android.diploma.ui.filter.model.FilterScreenState
 import ru.practicum.android.diploma.ui.filter.model.SelectedFilters
 import ru.practicum.android.diploma.ui.filter.place.models.Country
 import ru.practicum.android.diploma.ui.filter.place.models.Region
 
 class FilterViewModel(
-    private val filterPreferences: FilterPreferences
+    private val filterPreferences: FilterPreferencesInteractor
 ) : ViewModel() {
 
     private val state = MutableLiveData<FilterScreenState>()
     fun getState(): LiveData<FilterScreenState> = state
 
+    private val initialState = MutableLiveData<FilterScreenState>()
+
+    fun getCurrentSalary(): Int? {
+        return selectedFilters.salary
+    }
+
+    private val isFiltersChanged = MediatorLiveData<Boolean>().apply {
+        val observer: () -> Unit = {
+            val current = state.value
+            val initial = initialState.value
+
+            value = current is FilterScreenState.CONTENT &&
+                initial is FilterScreenState.CONTENT &&
+                !compareFilters(current.value, initial.value)
+        }
+
+        addSource(state) { observer() }
+        addSource(initialState) { observer() }
+    }
+
+    private val isFiltersDefault = MediatorLiveData<Boolean>().apply {
+        val observer: () -> Unit = {
+            val current = state.value
+
+            value = current is FilterScreenState.CONTENT && compareFilters(current.value, DEFAULT_FILTERS)
+        }
+
+        addSource(state) { observer() }
+    }
+
+    fun getIsFiltersChanged(): LiveData<Boolean> = isFiltersChanged
+    fun getIsFiltersDefault(): LiveData<Boolean> = isFiltersDefault
+
     private var selectedFilters = DEFAULT_FILTERS
 
-    fun getFilters() {
+    private fun compareFilters(a: SelectedFilters, b: SelectedFilters): Boolean {
+        return a.region?.id == b.region?.id &&
+            a.country?.id == b.country?.id &&
+            a.industry == b.industry &&
+            a.salary == b.salary &&
+            a.onlyWithSalary == b.onlyWithSalary
+    }
+
+    fun onCreate() {
         // Тут мы достаем сохраненные в SP фильтры
         selectedFilters = filterPreferences.loadFilters() ?: DEFAULT_FILTERS
         state.postValue(FilterScreenState.CONTENT(selectedFilters))
+        initialState.postValue(FilterScreenState.CONTENT(selectedFilters))
     }
 
     fun clearPlace() {
@@ -107,21 +150,7 @@ class FilterViewModel(
 
     fun setSalary(salary: Int?) {
         selectedFilters = selectedFilters.copy(salary = salary)
-        state.postValue(FilterScreenState.CONTENT(selectedFilters))
-    }
-
-    companion object {
-        private const val DEFAUlT_INDUSTRY_ID = ""
-        private const val DEFAULT_INDUSTRY_NAME = ""
-
-        private val DEFAULT_FILTERS = SelectedFilters(
-            null,
-            null,
-            DEFAUlT_INDUSTRY_ID,
-            DEFAULT_INDUSTRY_NAME,
-            null,
-            false
-        )
+        state.value = FilterScreenState.CONTENT(selectedFilters)
     }
 
     fun screenInit(binding: FragmentFilterBinding, context: Context) {
@@ -145,5 +174,16 @@ class FilterViewModel(
         }
         binding.includedBtnSet.root.isVisible = false
         binding.includedBtnCancel.root.isVisible = false
+    }
+
+    companion object {
+        private val DEFAULT_FILTERS = SelectedFilters(
+            null,
+            null,
+            null,
+            null,
+            null,
+            false
+        )
     }
 }
