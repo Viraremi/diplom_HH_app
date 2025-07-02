@@ -23,9 +23,9 @@ import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentMainBinding
 import ru.practicum.android.diploma.domain.vacancy.models.Vacancy
 import ru.practicum.android.diploma.ui.main.adapters.SearchAdapter
-import ru.practicum.android.diploma.ui.main.adapters.SearchListCallback
 import ru.practicum.android.diploma.ui.main.models.SearchContentStateVO
 import ru.practicum.android.diploma.ui.root.BindingFragment
+import ru.practicum.android.diploma.ui.root.ListCallback
 import ru.practicum.android.diploma.ui.root.RootActivity
 import ru.practicum.android.diploma.ui.vacancy.VacancyFragment
 import ru.practicum.android.diploma.util.HH_LOG
@@ -70,6 +70,7 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
         setObservers()
         initSearch()
         setAdapter()
+        viewModel.start()
     }
 
     private fun observeFilterApplyResult() {
@@ -209,7 +210,7 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
     private fun refreshList(newList: List<Vacancy>) {
         Log.d(HH_LOG, "ListSize=${newList.size}")
         vacanciesAdapter?.let {
-            val diffSearchCallback = SearchListCallback(it.vacancies, newList)
+            val diffSearchCallback = ListCallback(it.vacancies, newList)
             val diffSearch = DiffUtil.calculateDiff(diffSearchCallback)
             it.vacancies.clear()
             it.vacancies.addAll(newList)

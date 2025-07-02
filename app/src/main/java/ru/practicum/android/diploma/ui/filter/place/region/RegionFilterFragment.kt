@@ -27,9 +27,9 @@ import ru.practicum.android.diploma.ui.filter.place.REGION_KEY
 import ru.practicum.android.diploma.ui.filter.place.models.Country
 import ru.practicum.android.diploma.ui.filter.place.models.Region
 import ru.practicum.android.diploma.ui.filter.place.models.RegionState
-import ru.practicum.android.diploma.ui.filter.place.region.adapters.RegionListCallback
 import ru.practicum.android.diploma.ui.filter.place.region.adapters.RegionsAdapter
 import ru.practicum.android.diploma.ui.root.BindingFragment
+import ru.practicum.android.diploma.ui.root.ListCallback
 import ru.practicum.android.diploma.ui.root.RootActivity
 import ru.practicum.android.diploma.util.debounce
 import ru.practicum.android.diploma.util.getSerializable
@@ -151,7 +151,7 @@ class RegionFilterFragment : BindingFragment<FragmentRegionFilterBinding>() {
         binding.includedProgressBar.progressBar.isVisible = false
         binding.placeholder.isVisible = false
         adapter?.let {
-            val diffRegionsCallback = RegionListCallback(it.regions, regions)
+            val diffRegionsCallback = ListCallback(it.regions, regions)
             val diffRegions = DiffUtil.calculateDiff(diffRegionsCallback)
             it.regions.clear()
             it.regions.addAll(regions)

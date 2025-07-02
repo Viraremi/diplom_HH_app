@@ -1,5 +1,6 @@
 package ru.practicum.android.diploma.ui.main
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,6 +14,7 @@ import ru.practicum.android.diploma.domain.vacancy.models.Vacancy
 import ru.practicum.android.diploma.ui.common.SingleLiveEvent
 import ru.practicum.android.diploma.ui.filter.model.SelectedFilters
 import ru.practicum.android.diploma.ui.main.models.SearchContentStateVO
+import ru.practicum.android.diploma.util.HH_LOG
 import ru.practicum.android.diploma.util.debounce
 
 class MainViewModel(
@@ -24,10 +26,6 @@ class MainViewModel(
 
     private val textLiveData = MutableLiveData("")
     val text: LiveData<String> = textLiveData
-
-    init {
-        selectedFilters = filterPreferences.loadFilters()
-    }
 
     private val vacanciesList = ArrayList<Vacancy>()
     private var found = 0
@@ -49,6 +47,10 @@ class MainViewModel(
 
     private val showNoInternetToast = SingleLiveEvent<Unit>()
     fun observeShowNoInternetToast(): LiveData<Unit> = showNoInternetToast
+
+    fun start() {
+        selectedFilters = filterPreferences.loadFilters()
+    }
 
     fun forceSearch() {
         page = 0
@@ -137,6 +139,7 @@ class MainViewModel(
 
     private fun search(options: FilterOptions) {
         viewModelScope.launch {
+            Log.d(HH_LOG, "Search: ${options.searchText} \n ${options.area}")
             handleSearch(options)
         }
     }
@@ -166,12 +169,10 @@ class MainViewModel(
             } else {
                 showErrorToast.postValue(Unit)
             }
-
             contentStateLiveData.postValue(SearchContentStateVO.Success(vacanciesList, found))
 
             return
         }
-
         contentStateLiveData.postValue(
             when (searchResponse) {
                 is ApiResponse.Success -> {

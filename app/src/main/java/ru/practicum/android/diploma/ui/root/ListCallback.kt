@@ -1,24 +1,21 @@
-package ru.practicum.android.diploma.ui.main.adapters
+package ru.practicum.android.diploma.ui.root
 
 import androidx.recyclerview.widget.DiffUtil
-import ru.practicum.android.diploma.domain.vacancy.models.Vacancy
 
-class SearchListCallback(
-    private val oldList: List<Vacancy>,
-    private val newList: List<Vacancy>
+class ListCallback<T>(
+    private val oldList: List<T>,
+    private val newList: List<T>
 ) : DiffUtil.Callback() {
     override fun getOldListSize(): Int = oldList.size
 
     override fun getNewListSize(): Int = newList.size
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldList[oldItemPosition].id == newList[newItemPosition].id
+        return oldList[oldItemPosition] == newList[newItemPosition]
     }
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        val (id, name) = oldList[oldItemPosition]
-        val (id1, name1) = newList[newItemPosition]
-        return id == id1 && name == name1
+        return oldList[oldItemPosition] == newList[newItemPosition]
     }
 
     override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
