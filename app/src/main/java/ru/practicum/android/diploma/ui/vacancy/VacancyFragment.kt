@@ -19,6 +19,7 @@ import ru.practicum.android.diploma.R
 import ru.practicum.android.diploma.databinding.FragmentVacancyBinding
 import ru.practicum.android.diploma.ui.root.BindingFragment
 import ru.practicum.android.diploma.ui.root.RootActivity
+import ru.practicum.android.diploma.util.HTTP_400_BAD_REQUEST
 import ru.practicum.android.diploma.util.HTTP_500_INTERNAL_SERVER_ERROR
 import ru.practicum.android.diploma.util.HTTP_NO_CONNECTION
 
@@ -126,14 +127,16 @@ class VacancyFragment : BindingFragment<FragmentVacancyBinding>() {
         binding.noInternetError.isVisible = false
         binding.serverError.isVisible = false
         binding.includedErr.root.isVisible = false
-
         when (code) {
             HTTP_NO_CONNECTION -> {
                 binding.noInternetError.isVisible = true
             }
-            HTTP_500_INTERNAL_SERVER_ERROR -> {
+
+            HTTP_500_INTERNAL_SERVER_ERROR,
+            HTTP_400_BAD_REQUEST -> {
                 binding.serverError.isVisible = true
             }
+
             else -> {
                 binding.includedErr.root.isVisible = true
             }

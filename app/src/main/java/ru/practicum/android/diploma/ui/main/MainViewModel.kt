@@ -1,6 +1,5 @@
 package ru.practicum.android.diploma.ui.main
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,7 +13,6 @@ import ru.practicum.android.diploma.domain.vacancy.models.Vacancy
 import ru.practicum.android.diploma.ui.common.SingleLiveEvent
 import ru.practicum.android.diploma.ui.filter.model.SelectedFilters
 import ru.practicum.android.diploma.ui.main.models.SearchContentStateVO
-import ru.practicum.android.diploma.util.HH_LOG
 import ru.practicum.android.diploma.util.debounce
 
 class MainViewModel(
@@ -49,10 +47,20 @@ class MainViewModel(
     fun observeShowNoInternetToast(): LiveData<Unit> = showNoInternetToast
 
     fun start() {
-        selectedFilters = filterPreferences.loadFilters()
+        val filters = filterPreferences.loadFilters()
+        filtersState.postValue(
+            filters != null && (
+                filters.country != null ||
+                    filters.region != null ||
+                    filters.industryId != null ||
+                    filters.salary != null ||
+                    filters.onlyWithSalary
+                )
+        )
     }
 
     fun forceSearch() {
+        selectedFilters = filterPreferences.loadFilters()
         page = 0
         doSearch()
     }
@@ -110,9 +118,9 @@ class MainViewModel(
         if (text.isEmpty()) {
             return
         }
-
-        val filters = selectedFilters ?: SelectedFilters(null, null, null, null, null, false)
-
+        val filters =
+            selectedFilters ?: filterPreferences.loadFilters() ?: SelectedFilters(null, null, null, null, null, false)
+        selectedFilters = filters
         if (page == 0) {
             vacanciesList.clear()
             found = 0
@@ -139,24 +147,11 @@ class MainViewModel(
 
     private fun search(options: FilterOptions) {
         viewModelScope.launch {
-            Log.d(HH_LOG, "Search: ${options.searchText} \n ${options.area}")
             handleSearch(options)
         }
     }
 
     fun onResume() {
-        val filters = filterPreferences.loadFilters()
-        selectedFilters = filters
-        filtersState.postValue(
-            filters != null && (
-                filters.country != null ||
-                    filters.region != null ||
-                    filters.industryId != null ||
-                    filters.salary != null ||
-                    filters.onlyWithSalary
-                )
-        )
-
         doSearch()
     }
 

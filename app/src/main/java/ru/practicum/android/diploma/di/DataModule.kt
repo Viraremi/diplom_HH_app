@@ -23,8 +23,6 @@ import ru.practicum.android.diploma.data.vacancy.VacancyDetailsNetworkDataSource
 import ru.practicum.android.diploma.domain.api.FilterPreferences
 import ru.practicum.android.diploma.ui.vacancy.HtmlParser
 import ru.practicum.android.diploma.ui.vacancy.VacancyDetailsMapper
-import ru.practicum.android.diploma.util.API_BASE
-import ru.practicum.android.diploma.util.FILTER_PREFS_NAME
 
 val dataModule = module {
     single {

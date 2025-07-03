@@ -64,12 +64,14 @@ class NetworkClient(
         return when (e) {
             is HttpException -> {
                 Log.e(LOG_TAG, ERROR_LOG_MESSAGE, e)
-                Response().apply { resultCode = e.code() }
+                Response().apply { resultCode = HTTP_400_BAD_REQUEST }
             }
+
             is IOException -> {
                 Log.e(LOG_TAG, ERROR_LOG_MESSAGE, e)
                 Response().apply { resultCode = HTTP_NO_CONNECTION }
             }
+
             else -> {
                 Log.e(LOG_TAG, ERROR_LOG_MESSAGE, e)
                 Response().apply { resultCode = HTTP_500_INTERNAL_SERVER_ERROR }

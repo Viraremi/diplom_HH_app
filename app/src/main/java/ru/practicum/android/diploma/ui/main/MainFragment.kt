@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -28,7 +27,6 @@ import ru.practicum.android.diploma.ui.root.BindingFragment
 import ru.practicum.android.diploma.ui.root.ListCallback
 import ru.practicum.android.diploma.ui.root.RootActivity
 import ru.practicum.android.diploma.ui.vacancy.VacancyFragment
-import ru.practicum.android.diploma.util.HH_LOG
 
 class MainFragment : BindingFragment<FragmentMainBinding>() {
 
@@ -78,8 +76,10 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
             ?.savedStateHandle
             ?.getLiveData<Boolean>("filters_applied")
             ?.observe(viewLifecycleOwner) { applied ->
-                if (applied == true && viewModel.hasSearchQuery()) {
+                if (applied && viewModel.hasSearchQuery()) {
                     resetSearch()
+                } else {
+                    viewModel.onResume()
                 }
             }
     }
@@ -208,7 +208,6 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
     }
 
     private fun refreshList(newList: List<Vacancy>) {
-        Log.d(HH_LOG, "ListSize=${newList.size}")
         vacanciesAdapter?.let {
             val diffSearchCallback = ListCallback(it.vacancies, newList)
             val diffSearch = DiffUtil.calculateDiff(diffSearchCallback)
@@ -284,8 +283,8 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
         binding.vacanciesCount.isVisible = false
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.onResume()
-    }
+//    override fun onResume() {
+//        super.onResume()
+//        viewModel.onResume()
+//    }
 }
