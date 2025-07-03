@@ -50,7 +50,7 @@ class SearchVacanciesNetworkDataSource(
     }
 
     private fun getOptions(options: FilterOptions): Map<String, String> {
-        val hhOptions = buildMap<String, String>() {
+        val hhOptions = buildMap {
             put("per_page", VACANCY_PER_PAGE)
             put("text", options.searchText)
             put("page", options.page.toString())

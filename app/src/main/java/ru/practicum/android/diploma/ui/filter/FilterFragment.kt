@@ -100,6 +100,7 @@ class FilterFragment : BindingFragment<FragmentFilterBinding>() {
 
     private fun closeFragment(barVisibility: Boolean) {
         (activity as RootActivity).setNavBarVisibility(barVisibility)
+        findNavController().previousBackStackEntry?.savedStateHandle?.set("filters_applied", false)
         findNavController().popBackStack()
     }
 
