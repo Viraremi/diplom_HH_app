@@ -64,7 +64,7 @@ class NetworkClient(
         return when (e) {
             is HttpException -> {
                 Log.e(LOG_TAG, ERROR_LOG_MESSAGE, e)
-                Response().apply { resultCode = HTTP_400_BAD_REQUEST }
+                Response().apply { resultCode = e.code() }
             }
 
             is IOException -> {

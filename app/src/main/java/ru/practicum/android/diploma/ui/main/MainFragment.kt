@@ -282,9 +282,4 @@ class MainFragment : BindingFragment<FragmentMainBinding>() {
         binding.searchResults.isVisible = false
         binding.vacanciesCount.isVisible = false
     }
-
-//    override fun onResume() {
-//        super.onResume()
-//        viewModel.onResume()
-//    }
 }
